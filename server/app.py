@@ -1,32 +1,57 @@
-import socket
+from flask import Flask, render_template, send_from_directory
+import threading
+import asyncio
+from utils import UDPServer
+from websocket_server import WebSocketServer
+
+app = Flask(__name__)
+
+# 创建WebSocket服务器实例
+ws_server = WebSocketServer(host='0.0.0.0', port=8080)
 
 
-def start_udp_server():
-    # 创建 UDP socket
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    # 服务器地址和端口
-    host = '0.0.0.0'  # 监听所有可用网络接口
-    port = 8888
-
-    try:
-        # 绑定地址和端口
-        server_socket.bind((host, port))
-        print(f"UDP 服务器启动，监听在 {host}:{port}")
-
-        while True:
-            # 接收数据，最大缓冲区设为1024字节
-            data, client_address = server_socket.recvfrom(1024)
-
-            # 解码并打印接收到的数据
-            message = data.decode('utf-8')
-            print(f"从 {client_address} 接收到数据: {message}")
-
-    except Exception as e:
-        print(f"发生错误: {e}")
-    finally:
-        server_socket.close()
+def udp_data_callback(data):
+    """UDP数据回调函数，立即转发给WebSocket"""
+    ws_server.send_udp_data(data)
 
 
-if __name__ == "__main__":
-    start_udp_server()
+# 创建UDP服务器实例
+udp_server = UDPServer(host='0.0.0.0', port=8888, callback=udp_data_callback)
+
+
+@app.route('/')
+def index():
+    """主页面"""
+    return send_from_directory('static', 'index.html')
+
+
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    """静态文件服务"""
+    return send_from_directory('static', filename)
+
+
+def start_websocket_server():
+    """在单独线程中启动WebSocket服务器"""
+    ws_server.start()
+
+
+def start_servers():
+    """启动所有服务器"""
+    # 启动UDP服务器
+    udp_server.start()
+
+    # 在单独线程中启动WebSocket服务器
+    ws_thread = threading.Thread(target=start_websocket_server)
+    ws_thread.daemon = True
+    ws_thread.start()
+
+
+if __name__ == '__main__':
+    # 启动UDP和WebSocket服务器
+    start_servers()
+
+    # 启动Flask应用
+    print("主服务器启动在端口 5000")
+    print("访问 http://localhost:5000 查看实时数据")
+    app.run(host='0.0.0.0', port=5000, debug=False)

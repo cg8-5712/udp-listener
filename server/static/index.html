@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDP实时数据监控</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>UDP实时数据监控</h1>
+            <div class="status">
+                <span id="connection-status" class="status-disconnected">未连接</span>
+                <span id="message-count">消息数: 0</span>
+            </div>
+        </header>
+
+        <div class="controls">
+            <button id="clear-btn">清空数据</button>
+            <button id="toggle-auto-scroll">自动滚动: 开</button>
+            <span class="info">UDP端口: 8888 | WebSocket端口: 8080</span>
+        </div>
+
+        <div class="data-container">
+            <div id="data-list"></div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
