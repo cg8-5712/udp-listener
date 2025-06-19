@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 class UDPServer:
-    def __init__(self, host='localhost', port=8888, callback=None):
+    def __init__(self, host='0.0.0.0', port=8888, callback=None):
         self.host = host
         self.port = port
         self.callback = callback

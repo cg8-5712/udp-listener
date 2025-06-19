@@ -32,7 +32,7 @@ class UDPMonitor {
 
     connect() {
         try {
-            this.websocket = new WebSocket('ws://localhost:8080');
+            this.websocket = new WebSocket('ws://your-server-ip:8080');
 
             this.websocket.onopen = () => {
                 console.log('WebSocket连接已建立');
