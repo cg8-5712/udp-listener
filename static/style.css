@@ -49,6 +49,7 @@ h1 {
 
 .controls {
     display: flex;
+    flex-wrap: wrap;
     gap: 15px;
     align-items: center;
     margin-bottom: 20px;
@@ -158,4 +159,40 @@ button:hover {
 
 #data-list::-webkit-scrollbar-thumb:hover {
     background: #777;
+}
+
+.settings {
+    display: flex;
+    gap: 20px;
+    margin-left: auto;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.setting-item label {
+    color: #9cdcfe;
+    font-size: 14px;
+}
+
+.setting-item input[type="text"],
+.setting-item input[type="number"] {
+    background-color: #3c3c3c;
+    border: 1px solid #555;
+    color: #d4d4d4;
+    padding: 4px 8px;
+    border-radius: 3px;
+    width: 120px;
+}
+
+.setting-item input[type="range"] {
+    width: 100px;
+}
+
+#max-messages-value {
+    color: #ce9178;
+    min-width: 40px;
 }

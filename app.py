@@ -3,12 +3,21 @@ import threading
 import asyncio
 from utils import UDPServer
 from websocket_server import WebSocketServer
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
 
-# 创建WebSocket服务器实例
-ws_server = WebSocketServer(host='0.0.0.0', port=8080)
+# Load environment variables from .env file
+ws_host = os.getenv('WS_HOST', '0.0.0.0')
+ws_port = int(os.getenv('WS_PORT', 8080))
+udp_host = os.getenv('UDP_HOST', '0.0.0.0')
+udp_port = int(os.getenv('UDP_PORT', 8888))
+flask_host = os.getenv('FLASK_HOST', '0.0.0.0')
+flask_port = int(os.getenv('FLASK_PORT', 5000))
 
+# 创建WebSocket服务器实例
+ws_server = WebSocketServer(host=ws_host, port=ws_port)
 
 def udp_data_callback(data):
     """UDP数据回调函数，立即转发给WebSocket"""
@@ -16,7 +25,7 @@ def udp_data_callback(data):
 
 
 # 创建UDP服务器实例
-udp_server = UDPServer(host='0.0.0.0', port=8888, callback=udp_data_callback)
+udp_server = UDPServer(host=udp_host, port=udp_port, callback=udp_data_callback)
 
 
 @app.route('/')
@@ -52,6 +61,6 @@ if __name__ == '__main__':
     start_servers()
 
     # 启动Flask应用
-    print("主服务器启动在端口 5000")
-    print("访问 http://localhost:5000 查看实时数据")
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    print(f"主服务器启动在端口 {flask_port}")
+    print(f"访问 http://{flask_host}:{flask_port} 查看实时数据")
+    app.run(host=flask_host, port=flask_port, debug=False)

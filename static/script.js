@@ -3,10 +3,13 @@ class UDPMonitor {
         this.websocket = null;
         this.messageCount = 0;
         this.autoScroll = true;
-        this.maxMessages = 1000; // 最大显示消息数，防止内存占用过大
+        this.maxMessages = 1000;
+        this.serverIP = localStorage.getItem('serverIP') || 'localhost';
+        this.serverPort = localStorage.getItem('serverPort') || '8080';
 
         this.initElements();
         this.bindEvents();
+        this.loadSettings();
         this.connect();
     }
 
@@ -16,11 +19,18 @@ class UDPMonitor {
         this.messageCountEl = document.getElementById('message-count');
         this.clearBtn = document.getElementById('clear-btn');
         this.toggleScrollBtn = document.getElementById('toggle-auto-scroll');
+        this.serverIPInput = document.getElementById('server-ip');
+        this.serverPortInput = document.getElementById('server-port');
+        this.maxMessagesInput = document.getElementById('max-messages');
+        this.maxMessagesValue = document.getElementById('max-messages-value');
     }
 
     bindEvents() {
         this.clearBtn.addEventListener('click', () => this.clearData());
         this.toggleScrollBtn.addEventListener('click', () => this.toggleAutoScroll());
+        this.serverIPInput.addEventListener('change', () => this.updateServerSettings());
+        this.serverPortInput.addEventListener('change', () => this.updateServerSettings());
+        this.maxMessagesInput.addEventListener('input', () => this.updateMaxMessages());
 
         // 页面关闭时断开连接
         window.addEventListener('beforeunload', () => {
@@ -30,9 +40,46 @@ class UDPMonitor {
         });
     }
 
+    loadSettings() {
+        this.serverIPInput.value = this.serverIP;
+        this.serverPortInput.value = this.serverPort;
+        this.maxMessagesInput.value = this.maxMessages;
+        this.maxMessagesValue.textContent = this.maxMessages;
+    }
+
+    updateServerSettings() {
+        const newIP = this.serverIPInput.value;
+        const newPort = this.serverPortInput.value;
+        
+        if (newIP !== this.serverIP || newPort !== this.serverPort) {
+            this.serverIP = newIP;
+            this.serverPort = newPort;
+            
+            localStorage.setItem('serverIP', this.serverIP);
+            localStorage.setItem('serverPort', this.serverPort);
+
+            // 重新连接WebSocket
+            if (this.websocket) {
+                this.websocket.close();
+            }
+            this.connect();
+        }
+    }
+
+    updateMaxMessages() {
+        this.maxMessages = parseInt(this.maxMessagesInput.value);
+        this.maxMessagesValue.textContent = this.maxMessages;
+        
+        // 如果当前消息数超过新的最大值，删除多余的消息
+        while (this.dataList.children.length > this.maxMessages) {
+            this.dataList.removeChild(this.dataList.firstChild);
+        }
+    }
+
     connect() {
         try {
-            this.websocket = new WebSocket('ws://your-server-ip:8080');
+            const wsUrl = `ws://${this.serverIP}:${this.serverPort}`;
+            this.websocket = new WebSocket(wsUrl);
 
             this.websocket.onopen = () => {
                 console.log('WebSocket连接已建立');
